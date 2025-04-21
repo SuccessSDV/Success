@@ -3,19 +3,26 @@ package fr.sdv.my_game_project;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import fr.sdv.my_game_project.Main;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import fr.sdv.my_game_project.models.Board;
 import fr.sdv.my_game_project.models.Tile;
 import fr.sdv.my_game_project.models.pieces.King;
 import fr.sdv.my_game_project.models.pieces.Pawn;
 import fr.sdv.my_game_project.models.pieces.Piece;
 import fr.sdv.my_game_project.models.pieces.Queen;
+import com.badlogic.gdx.InputMultiplexer;
 
 import java.util.List;
 
@@ -39,7 +46,13 @@ public class GameScreen extends InputAdapter implements Screen {
 
     private boolean isWhiteTurn = true;
     private boolean gameOver = false;
+
     private String winnerText = "";
+    private Label winnerLabel;
+
+    private Stage stage;
+    private Skin skin;
+    private TextButton replayButton;
 
     /**
      * Constructs the GameScreen and initializes the board, camera, textures, and input handling.
@@ -50,13 +63,50 @@ public class GameScreen extends InputAdapter implements Screen {
         this.game = game;
         this.board = new Board();
         this.camera = new OrthographicCamera();
+        this.stage = new Stage();
+        this.skin = new Skin(Gdx.files.internal("flat-earth\\skin\\flat-earth-ui.json"));
+
+        InputMultiplexer multiplexer = new InputMultiplexer();
+
         camera.setToOrtho(false, 8 * TILE_SIZE, 8 * TILE_SIZE);
 
         lightTile = new Texture("images/tiles/LightTile.png");
         darkTile = new Texture("images/tiles/DarkTile.png");
         highlight = new Texture("images/tiles/HighlightTile.png");
 
-        Gdx.input.setInputProcessor(this);
+
+        replayButton = new TextButton("Rejouer", skin);
+        replayButton.setSize(200, 50);
+        replayButton.setPosition((8 * TILE_SIZE - replayButton.getWidth()) / 2, (8 * TILE_SIZE - replayButton.getHeight()) / 2);
+        replayButton.setVisible(false);
+
+        replayButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                board = new Board();
+                isWhiteTurn = true;
+                gameOver = false;
+                winnerText = "";
+                winnerLabel.setVisible(false);
+                selectedTile = null;
+                legalMoves = null;
+                replayButton.setVisible(false);
+            }
+        });
+
+        Label.LabelStyle baseStyle = skin.get("default", Label.LabelStyle.class);
+        Label.LabelStyle whiteStyle = new Label.LabelStyle(baseStyle.font, Color.WHITE);
+        this.winnerLabel = new Label("", whiteStyle);
+        this.winnerLabel.setVisible(false);
+        this.winnerLabel.setFontScale(1.5f);
+
+        stage.addActor(replayButton);
+        stage.addActor(winnerLabel);
+
+        multiplexer.addProcessor(stage);
+        multiplexer.addProcessor(this);
+
+        Gdx.input.setInputProcessor(multiplexer);
     }
 
     /**
@@ -99,22 +149,20 @@ public class GameScreen extends InputAdapter implements Screen {
         }
 
         game.batch.end();
+        replayButton.setDisabled(false);
 
         // Display winner text if game is over
         if (gameOver) {
-            GlyphLayout layout = new GlyphLayout();
-            layout.setText(game.font, winnerText);
+            winnerLabel.setText(winnerText);
 
-            float textWidth = layout.width;
-            float screenWidth = 8 * TILE_SIZE;
+            this.winnerLabel.pack();
+            this.winnerLabel.setPosition((8 * TILE_SIZE - winnerLabel.getWidth()) / 2, (8 * TILE_SIZE + winnerLabel.getHeight() + replayButton.getHeight()) / 2);
 
-            float x = (screenWidth - textWidth) / 2f;
-            float y = screenWidth / 2f;
-
-            game.batch.begin();
-            game.font.draw(game.batch, winnerText, x, y);
-            game.batch.end();
+            winnerLabel.setVisible(true);
+            replayButton.setVisible(true);
         }
+        this.stage.act(delta);
+        this.stage.draw();
     }
 
     /**
