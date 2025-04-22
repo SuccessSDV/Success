@@ -33,23 +33,15 @@ import java.util.List;
 public class GameScreen extends InputAdapter implements Screen {
 
     private Main game;
-    private Board board;
     private OrthographicCamera camera;
-    private static final int TILE_SIZE = 66;
+    private GameController controller;
 
-    private Tile selectedTile = null;
-    private List<Vector2> legalMoves = null;
+    private static final int TILE_SIZE = 66;
 
     private Texture lightTile;
     private Texture darkTile;
     private Texture highlight;
-
-    private boolean isWhiteTurn = true;
-    private boolean gameOver = false;
-
-    private String winnerText = "";
     private Label winnerLabel;
-
     private Stage stage;
     private Skin skin;
     private TextButton replayButton;
@@ -61,7 +53,7 @@ public class GameScreen extends InputAdapter implements Screen {
      */
     public GameScreen(Main game) {
         this.game = game;
-        this.board = new Board();
+        this.controller = new GameController();
         this.camera = new OrthographicCamera();
         this.stage = new Stage();
         this.skin = new Skin(Gdx.files.internal("flat-earth\\skin\\flat-earth-ui.json"));
@@ -83,13 +75,8 @@ public class GameScreen extends InputAdapter implements Screen {
         replayButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                board = new Board();
-                isWhiteTurn = true;
-                gameOver = false;
-                winnerText = "";
+                controller.resetGame();
                 winnerLabel.setVisible(false);
-                selectedTile = null;
-                legalMoves = null;
                 replayButton.setVisible(false);
             }
         });
@@ -130,17 +117,16 @@ public class GameScreen extends InputAdapter implements Screen {
             }
         }
 
-        // Draw legal move highlights
+        List<Vector2> legalMoves = controller.getLegalMoves();
         if (legalMoves != null) {
             for (Vector2 move : legalMoves) {
                 game.batch.draw(highlight, move.x * TILE_SIZE, move.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
         }
 
-        // Draw pieces
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
-                Tile tile = board.getTile(x, y);
+                Tile tile = controller.getBoard().getTile(x, y);
                 if (tile.isOccupied()) {
                     Texture texture = tile.getPiece().getTexture();
                     game.batch.draw(texture, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
@@ -151,16 +137,16 @@ public class GameScreen extends InputAdapter implements Screen {
         game.batch.end();
         replayButton.setDisabled(false);
 
-        // Display winner text if game is over
-        if (gameOver) {
-            winnerLabel.setText(winnerText);
-
-            this.winnerLabel.pack();
-            this.winnerLabel.setPosition((8 * TILE_SIZE - winnerLabel.getWidth()) / 2, (8 * TILE_SIZE + winnerLabel.getHeight() + replayButton.getHeight()) / 2);
+        if (controller.isGameOver()) {
+            winnerLabel.setText(controller.getWinnerText());
+            winnerLabel.pack();
+            winnerLabel.setPosition((8 * TILE_SIZE - winnerLabel.getWidth()) / 2,
+                (8 * TILE_SIZE + winnerLabel.getHeight() + replayButton.getHeight()) / 2);
 
             winnerLabel.setVisible(true);
             replayButton.setVisible(true);
         }
+
         this.stage.act(delta);
         this.stage.draw();
     }
@@ -172,54 +158,16 @@ public class GameScreen extends InputAdapter implements Screen {
      */
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if (gameOver) return false;
+        if (controller.isGameOver()) return false;
 
         Vector3 touch = new Vector3(screenX, screenY, 0);
         camera.unproject(touch);
         int x = (int) (touch.x / TILE_SIZE);
         int y = (int) (touch.y / TILE_SIZE);
 
-        Tile tile = board.getTile(x, y);
-        if (tile == null) return false;
-
-        if (selectedTile == null) {
-            if (tile.isOccupied() && tile.getPiece().isWhite() == isWhiteTurn) {
-                selectedTile = tile;
-                legalMoves = tile.getPiece().getLegalMoves(board, x, y);
-            }
-        } else {
-            Vector2 clicked = new Vector2(x, y);
-            if (legalMoves != null && legalMoves.contains(clicked)) {
-                Tile targetTile = board.getTile(x, y);
-                Piece captured = targetTile.getPiece();
-                Piece movingPiece = selectedTile.getPiece();
-
-                targetTile.setPiece(movingPiece);
-
-                // Handle promotion
-                if (movingPiece instanceof Pawn) {
-                    boolean shouldPromote = (movingPiece.isWhite() && y == 7) || (!movingPiece.isWhite() && y == 0);
-                    if (shouldPromote) {
-                        targetTile.setPiece(new Queen(movingPiece.isWhite()));
-                    }
-                }
-
-                // Check for endgame
-                if (captured instanceof King) {
-                    gameOver = true;
-                    winnerText = isWhiteTurn ? "Les Blancs gagnent !" : "Les Noirs gagnent !";
-                }
-
-                selectedTile.removePiece();
-                isWhiteTurn = !isWhiteTurn;
-            }
-
-            selectedTile = null;
-            legalMoves = null;
-        }
-
-        return true;
+        return controller.handleTileClick(x, y);
     }
+
 
     // The following methods are required by the Screen interface but not used
     @Override public void resize(int width, int height) {}

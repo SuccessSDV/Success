@@ -1,5 +1,5 @@
 
-package tests.unit_tests;
+package unit_tests;
 
 import fr.sdv.my_game_project.models.Board;
 import org.junit.jupiter.api.Test;

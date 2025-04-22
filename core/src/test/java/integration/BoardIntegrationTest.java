@@ -1,5 +1,5 @@
 
-package tests.integration;
+package integration;
 
 import com.badlogic.gdx.math.Vector2;
 import fr.sdv.my_game_project.models.Board;

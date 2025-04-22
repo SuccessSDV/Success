@@ -1,5 +1,5 @@
 
-package tests.load;
+package load;
 
 import fr.sdv.my_game_project.models.Board;
 import fr.sdv.my_game_project.models.Tile;
