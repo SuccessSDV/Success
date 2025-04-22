@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -16,12 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import fr.sdv.my_game_project.models.Board;
 import fr.sdv.my_game_project.models.Tile;
-import fr.sdv.my_game_project.models.pieces.King;
-import fr.sdv.my_game_project.models.pieces.Pawn;
-import fr.sdv.my_game_project.models.pieces.Piece;
-import fr.sdv.my_game_project.models.pieces.Queen;
+
 import com.badlogic.gdx.InputMultiplexer;
 
 import java.util.List;
@@ -83,9 +78,9 @@ public class GameScreen extends InputAdapter implements Screen {
 
         Label.LabelStyle baseStyle = skin.get("default", Label.LabelStyle.class);
         Label.LabelStyle whiteStyle = new Label.LabelStyle(baseStyle.font, Color.WHITE);
-        this.winnerLabel = new Label("", whiteStyle);
-        this.winnerLabel.setVisible(false);
-        this.winnerLabel.setFontScale(1.5f);
+        winnerLabel = new Label("", whiteStyle);
+        winnerLabel.setVisible(false);
+        winnerLabel.setFontScale(1.5f);
 
         stage.addActor(replayButton);
         stage.addActor(winnerLabel);
@@ -109,7 +104,6 @@ public class GameScreen extends InputAdapter implements Screen {
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
 
-        // Draw tiles
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
                 boolean isLight = (x + y) % 2 == 0;
@@ -168,8 +162,6 @@ public class GameScreen extends InputAdapter implements Screen {
         return controller.handleTileClick(x, y);
     }
 
-
-    // The following methods are required by the Screen interface but not used
     @Override public void resize(int width, int height) {}
     @Override public void pause() {}
     @Override public void resume() {}
