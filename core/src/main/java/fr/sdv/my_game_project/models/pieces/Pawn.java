@@ -10,7 +10,8 @@ import java.util.List;
 public class Pawn extends Piece {
     public Pawn(boolean isWhite) {
         super(isWhite);
-        this.setTexture("Pawn");
+        if (isWhite) this.setTexture("garen");
+        else this.setTexture("darius");
     }
 
     @Override
@@ -18,18 +19,15 @@ public class Pawn extends Piece {
         List<Vector2> moves = new ArrayList<>();
         int dir = isWhite ? 1 : -1;
 
-        // Avancer d'une case
         if (isValidTile(x, y + dir) && isEmpty(board, x, y + dir)) {
             moves.add(new Vector2(x, y + dir));
 
-            // Premier coup : deux cases
             boolean isStartRow = isWhite ? y == 1 : y == 6;
             if (isStartRow && isEmpty(board, x, y + 2 * dir)) {
                 moves.add(new Vector2(x, y + 2 * dir));
             }
         }
 
-        // Captures diagonales
         addCaptureIfEnemy(board, moves, x - 1, y + dir);
         addCaptureIfEnemy(board, moves, x + 1, y + dir);
 

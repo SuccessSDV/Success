@@ -10,7 +10,8 @@ import java.util.List;
 public class Rook extends Piece {
     public Rook(boolean isWhite) {
         super(isWhite);
-        this.setTexture("Rook");
+        if (isWhite) this.setTexture("galio");
+        else this.setTexture("sion");
     }
 
     @Override

@@ -11,7 +11,8 @@ import java.util.List;
 public class King extends Piece {
     public King(boolean isWhite) {
         super(isWhite);
-        this.setTexture("King");
+        if (isWhite) this.setTexture("jarvan_iv");
+        else this.setTexture("swain");
     }
 
     @Override

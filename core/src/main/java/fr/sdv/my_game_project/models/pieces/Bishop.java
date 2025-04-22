@@ -10,7 +10,8 @@ import java.util.List;
 public class Bishop extends Piece {
     public Bishop(boolean isWhite) {
         super(isWhite);
-        this.setTexture("Bishop");
+        if (isWhite) this.setTexture("sylas");
+        else this.setTexture("briar");
     }
 
     @Override

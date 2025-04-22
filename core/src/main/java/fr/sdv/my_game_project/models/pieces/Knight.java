@@ -10,7 +10,8 @@ import java.util.List;
 public class Knight extends Piece {
     public Knight(boolean isWhite) {
         super(isWhite);
-        this.setTexture("Knight");
+        if (isWhite) this.setTexture("quinn");
+        else this.setTexture("kled");
     }
 
     @Override

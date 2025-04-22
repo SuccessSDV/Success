@@ -10,7 +10,8 @@ import java.util.List;
 public class Queen extends Piece {
     public Queen(boolean isWhite) {
         super(isWhite);
-        this.setTexture("Queen");
+        if (isWhite) this.setTexture("kayle");
+        else this.setTexture("ambessa");
     }
 
     @Override

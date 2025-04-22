@@ -54,7 +54,7 @@ public abstract class Piece {
      * @param name the name of the piece to be used in the file path
      */
     protected void setTexture(String name) {
-        texture = new Texture( "images/pieces/" + (isWhite ? "Light" : "Dark")+ name +".png");
+        texture = new Texture( "images/lol-pieces/" + (isWhite ? "Demacia/" : "Noxus/") + name + (isWhite ? "_back" : "_front") +".png");
     }
 
     /**
